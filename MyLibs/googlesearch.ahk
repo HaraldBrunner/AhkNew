@@ -1,5 +1,3 @@
-#NoEnv
-
 #Include base.ahk
 
 googlesearch(){

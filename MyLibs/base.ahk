@@ -1992,26 +1992,19 @@ mpcsend( 893 ,id)
 
 rateNormal(id,val){
 	;tt("rateNormal:script:" . A_ScriptName . " id:" . id . " val:" . val)
-	if (A_ScriptName!="bpwheel.ahk") {
-		SendData("bpwheel", "rateNormalChanged,RNCid," . id . ",RNCval," . val)
-		return
-	}else{
-		post:=false
-		if (val!=0) {
-			setVarById("rateNormal",false,id)
-			if (val>0) {
-				mpcsend( 895 ,id,post)
-			}else{
-				mpcsend( 894 ,id,post)
-			}
-		} else{
-			rn:=getVarById("rateNormal",id)
-			if(!rn){
-				mpcsend( 896 ,id,post)
-				setVarById("rateNormal",true,id)
-			}
+	
+	post:=false
+	if (val!=0) {
+		if (val>0) {
+			mpcsend( 895 ,id,post)
+		}else{
+			mpcsend( 894 ,id,post)
 		}
+	} else{
+		mpcsend( 896 ,id,post)
+		setVarById("rateNormal",true,id)
 	}
+
 }
 
 
@@ -2024,7 +2017,6 @@ mpcsend_Decrease_Rate(id) {
 
 
 mpcsend_Reset_Rate(id) {
-
 	rateNormal(id,0)
 }
 
@@ -3388,5 +3380,15 @@ getActiveWin() {
 			return aid
 		}else{
 			return 0
+		}
+	}
+
+	lowerabsToZero(ByRef a,ByRef b){
+
+		if (abs(a)<abs(b)) {
+			a:=0
+		}
+		else if (abs(a)>abs(b))  {
+			b:=0
 		}
 	}
