@@ -5,6 +5,8 @@ SetBatchLines, -1
 CoordMode,Mouse, Screen
 CoordMode, Pixel, Screen
 CoordMode, ToolTip, Screen
+SetWinDelay,-1 ; kde functions are really nice with this, but for some window functions, it could be too fast
+
 
 SetWorkingDir, %A_ScriptDir%
 #Include C:\ProgrammeUser\AHK_New\MyLibs 
