@@ -18,6 +18,8 @@ SetWorkingDir, %A_ScriptDir%
 #include MouseTracker.ahk
 #include MouseTrackerCBLAlt.ahk
 #include actOther.ahk
+#include hotkeysLib.ahk
+
 
 Default__Warn(obs*)
 {
@@ -27,9 +29,9 @@ Default__Warn(obs*)
 	
 }
 "".base.__Get := "".base.__Set := "".base.__Call := Func("Default__Warn")
-
-lsc:=new KeyCounter("LShift","LShiftCount")  
-maxInterval:=1200
+maxInterval:=400
+lsc:=new KeyCounter("LShift","LShiftCount",maxInterval,maxInterval-1)  
+maxInterval:=400
 lac:=new KeyCounter("LAlt", "LAltCount",maxInterval,maxInterval-1)
 maxInterval:=400
 f7C:=new KeyCounter("F7", "F7Count",maxInterval,maxInterval-1)
@@ -37,6 +39,12 @@ maxInterval:=400
 lc:=new KeyCounter("LControl", "LCtrlCount",maxInterval,maxInterval-1)
 maxInterval:=400
 mb:=new KeyCounter("MButton", "MButtonCount",maxInterval,maxInterval-1)
+
+buildMenu()
+
+
+mpcBe64exe:="mpc-be64.exe"
+GroupAdd, grpPlayers, ahk_exe %mpcBe64exe%
 
 tt("hotkeys started")
 Return
@@ -61,17 +69,23 @@ return
 return
 
 ~*LCtrl::
-	global gmyLCtrl:=true
+setScalingAware()
+	global gMyLCtrl:=true
 return
 ~*LCtrl Up::
-	global gmyLCtrl:=false
+setScalingAware()
+	global gMyLCtrl:=false
 return
 
 ~*LShift::
-	global mylshift:=true
+setScalingAware()
+	global gMylshift:=true
+	curcount:=lsc.keydown()
 return 
 ~*LShift up::
-	global mylshift:=false
+setScalingAware()
+	global gMylshift:=false
+	lsc.keyup()
 return
 
 ~*F7::
@@ -85,6 +99,36 @@ global gF7:=false
 f7c.keyup()
 return
 
+~*LButton::
+;tt("LBUTTON")
+global gMouseButtonHit :=1
+global gMyLButtonDownpoint := point.frommouse()
+global gMyLButtonDown:=true
+return
+
+~*LButton up::
+;tt("LBUTTON up")
+global gMyLButtonDown:=false
+global gMyLButtonDownpoint := ""
+return
+
+RButton::
+;tt("RButton::")
+global gMyLButtonDown
+global menPoint
+menPoint:=point.frommouse()
+if(gMyLButtonDown){
+	KeyWait, LButton, L
+	KeyWait, RButton, L
+	tt("menuu()")
+	openMainMenu()
+}else{
+	global gMyRButtonDown:=true
+	Send, {RButton}
+}
+
+return
+
 ~^s::
 Reload
 Return
@@ -93,6 +137,7 @@ Return
 Run, shutdown /h
 
 MButton::
+setScalingAware()
 id:=getMouseWin()
 ;tt(getWinInfobase(id))
 DllCall("SetWindowPos","UInt",id,"UInt",1 ,"Int",0,"Int",0,"Int",0,"Int",0,"UInt",SWP_NOACTIVATE() | SWP_NOMOVE() | SWP_NOSIZE() | SWP_NOREDRAW() | SWP_NOSENDCHANGING() )	 
@@ -138,6 +183,7 @@ return
 
 #If !ismpcwin(getMouseWin())
 !F7::
+setScalingAware()
 googlesearch()
 return
 
@@ -191,15 +237,122 @@ id:=getctid()
 mpcsend_Reset_Rate(id)
 return
 
+^WheelUp::
+setScalingAware()
+id:=getctid()
+	mpcsend_Jump_Forward_large(id)
+return
 
+^WheelDown::
+setScalingAware()
+	id:=getctid()
+	mpcsend_Jump_Backward_large(id)
+return
 
 
 F7Count(c,mp) {
 	;tt(c)
 	id:=getMouseWin()
-	if(ismpcwin(id)) {
-		if (c==1) {
-			mpcsend_Play_Pause(id)
+
+	if (c==2) {
+		Run, osk.exe ;, , Max|Min|Hide|UseErrorLevel, OutputVarPID]
+		
+	}Else{
+		if(ismpcwin(id)) {
+			if (c==1) {
+				mpcsend_Play_Pause(id)
+			}
 		}
 	}
 }
+
+LShiftCount(c,mp) {
+	;tt(c)
+	id:=getMouseWin()
+	if (c=2) {
+		openMainMenu()
+	} else if(ismpcwin(id)) {
+		if (c==1) {
+			if (isFullscreenarea()) {
+				mpcsend_Toggle_Playlist_Bar(id)
+			}
+		}
+	}
+}
+
+
+buildMenu() {
+	for i,dm in getDynWinSubMenus() {
+		
+        dm.setParentAndAddsubmenu("RareMenu")
+    }
+    Menu, MyMenu, Add
+	Menu, MyMenu, Add
+    Menu, MyMenu, Add
+	locVar := getINIBoolVars()
+    for index, element in locVar {
+		Menu, SetMenu, Add, %element%, INIBoolItemLab
+	}
+	Menu, MyMenu, Add,SetMenu,:SetMenu
+}
+
+adjustDynMenItems() {
+    temp:=readini()
+	locVar := getINIBoolVars()
+    for index, element in locVar {
+	istrue := temp[element]
+    if (istrue) {
+            Menu, SetMenu,Check, %element%
+        } else {
+            Menu, SetMenu,UnCheck, %element%
+        }
+
+    }
+}
+
+openMainMenu() {
+    killmenu()
+
+
+    global menposx,menposy,menposid,menposctrlid,gTitle, gmenuPoint
+    MouseGetPos,menposx,menposy, menposid  ;    ,menposctrlid,2
+	menposid:=getctid()
+	menposctrlid:= getWindowFromPointExact(menposx,menposy)
+	calcTitleInfo(menposid,fpath,fpathOrTitle, schedTo,schedTotfpath)
+  	gtitle:=fpathOrTitle
+	if (fpath) {
+        SplitPath, fpath , OutFileName, OutDir, OutExtension, OutNameNoExt, OutDrive
+        ;Clipboard = %OutFileName%
+    } else {
+        ;Clipboard = %fpathOrTitle%
+    }
+
+
+	s= %fpathOrTitle%
+
+    if (s) {
+		;mos()
+        tt(s)
+    }
+
+    ;    Menu, MyMenu, Show
+
+    for i,dm in getDynWinSubMenus() {
+		if (dm.inlineMenuu()) {
+			mname:=dm.__Class
+			startt:=A_TickCount
+			dm.buildmenu()
+			duration:=A_TickCount-startt
+			;            tt(duration . " " . mname  )
+        }
+    }
+
+    adjustDynMenItems()
+
+    Menu, MyMenu, Show
+}
+
+INIBoolItemLab:
+tp:=readini()
+tp[A_ThisMenuItem] := !tp[A_ThisMenuItem] 
+return

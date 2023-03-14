@@ -1989,7 +1989,6 @@ mpcsend_Go_To(id:="") {
 mpcsend( 893 ,id)
 }
 
-
 rateNormal(id,val){
 	;tt("rateNormal:script:" . A_ScriptName . " id:" . id . " val:" . val)
 	
@@ -3335,9 +3334,8 @@ beforeSizeAdjusted(id,r){
 	
 	if(isfullold!=isfullNew){
 		;mos("isfullold!=isfullNew",id)
-		callfunc("adaptShaderToSize",id,isfullNew)
-		;callfunc("enableShaders",id,isfullNew)
-		;mpcsend_Toggle_Screen_Shader(id)
+		;callfunc("adaptShaderToSize",id,isfullNew)
+		
 	}
 			
 }
@@ -3371,24 +3369,143 @@ getActiveWin() {
 			;mos(aid)
 		}
 		return aid
-	}
+}
 	
-	assureActive(id){
-		aid:=getActiveWin()
-		if (aid!=id) {
-			WinActivate,ahk_id %id%
-			return aid
+assureActive(id){
+	aid:=getActiveWin()
+	if (aid!=id) {
+		WinActivate,ahk_id %id%
+		return aid
+	}else{
+		return 0
+	}
+}
+
+lowerabsToZero(ByRef a,ByRef b){
+
+	if (abs(a)<abs(b)) {
+		a:=0
+	}
+	else if (abs(a)>abs(b))  {
+		b:=0
+	}
+}
+
+getCtrlC(){
+
+	prevClipboard = %clipboard%
+	clipboard =
+	Sleep, 50
+	Send, ^c
+	;BlockInput, off
+	ClipWait, 5,1	
+	if ErrorLevel = 0
+	{
+		ret:=clipboard
+	}else{
+		ttos("errorWith Clip",clipboard)
+		ret:=""
+	}
+	clipboard = %prevClipboard%
+	return ret
+}
+
+concat(sep,ps){
+	str:=""
+	first:=true
+	for index,p in ps
+	{
+		if (first) {
+			first:=false
+			str .= p
 		}else{
-			return 0
+			str .= sep . p
 		}
 	}
+	return str
 
-	lowerabsToZero(ByRef a,ByRef b){
+}
 
-		if (abs(a)<abs(b)) {
-			a:=0
-		}
-		else if (abs(a)>abs(b))  {
-			b:=0
+randomizeArray(items){
+	ret:=Object()
+	while (items.maxindex()){
+		mitems:=items.maxindex()
+		Random,  rn, 1, mitems
+		
+		item:=items.remove(rn)
+		ret.push(item)
+	}
+	return ret
+}
+
+
+
+getscreen(Mx := "", My := "")
+{
+	if  (!Mx or !My) 
+	{
+		; if Mx or My is empty, revert to the mouse cursor placement
+		Coordmode, Mouse, Screen	; use Screen, so we can compare the coords with the sysget information`
+		MouseGetPos, Mx, My
+	}
+
+	SysGet, MonitorCount, 80	; monitorcount, so we know how many monitors there are, and the number of loops we need to do
+	Loop, %MonitorCount%
+	{
+		SysGet, mon%A_Index%, Monitor, %A_Index%	; "Monitor" will get the total desktop space of the monitor, including taskbars
+
+		if ( Mx >= mon%A_Index%left ) && ( Mx < mon%A_Index%right ) && ( My >= mon%A_Index%top ) && ( My < mon%A_Index%bottom )
+		{
+			ActiveMon := A_Index
+			break
 		}
 	}
+	return ActiveMon
+}
+
+getScreenpos(monitorNumber, ByRef x,ByRef y,ByRef w,ByRef h){
+	SysGet, Monitor, Monitor, monitorNumber
+	x:=MonitorLeft
+	y:=MonitorTop
+	w:=MonitorRight-x
+	h:=MonitorBottom-y
+}
+
+getPidFromWin(id){
+	winget pid, pid , ahk_id %id%
+	return pid
+}
+
+getSimpleAudioVolume(lookuppidOrName) {
+
+	IID_IAudioSessionManager2 := "{77AA99A0-1BD6-484F-8BC7-2C654C9A9B6F}"
+	IID_ISimpleAudioVolume := "{87CE5498-68D6-44E5-9215-6DA47EF883D8}"
+
+	dev := VA_GetDevice()
+	if !dev
+		throw "Can't get device"
+	if VA_IMMDevice_Activate(dev, IID_IAudioSessionManager2, 7, 0, mgr) != 0
+		throw "Can't get session manager"
+	ObjRelease(dev)
+	if VA_IAudioSessionManager2_GetSessionEnumerator(mgr, enm) != 0
+		throw "Can't get session enumerator"
+	ObjRelease(mgr)
+	VA_IAudioSessionEnumerator_GetCount(enm, count)
+	retSAV:=""
+	Loop % count
+	{
+		; IAudioSessionControl *session;
+		VA_IAudioSessionEnumerator_GetSession(enm, A_Index-1, ssn)
+		VA_IAudioSessionControl_GetDisplayName(ssn, name)
+		VA_IAudioSessionControl2_GetProcessId(ssn, pid)
+		if (pid!=lookuppidOrName && name!=lookuppidOrName) {
+			ObjRelease(ssn)
+			continue
+		}
+		retSAV := ComObjQuery(ssn, IID_ISimpleAudioVolume)
+		ObjRelease(ssn)
+	}
+	ObjRelease(enm)
+	return retSAV
+	
+}

@@ -34,6 +34,7 @@ mouseOnCtrlBoarder(){
 }
 
 isMpcWinWithCtrlCheck(id:="") {
+    setScalingAware()
     if(id==""){
         id:=getWindowFromPoint(point.frommouse())
     }
