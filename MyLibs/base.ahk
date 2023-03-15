@@ -323,6 +323,18 @@ noclickthrough(ids){
 	return ret
 }
 
+
+getNoOtherScreen(ids){
+	ret:=Object()
+	for index,id in ids{
+		
+		If (getscreenFromMouse() == getscreenFromPoint( new rect(id).getCenter())) { 
+			ret.push(id)
+		}
+	}
+	return ret
+}
+
 getNonHidden(ids){
 	ret:=Object()
 	for index,id in ids{
@@ -1668,17 +1680,6 @@ class rect{
 		return ret
 	}
 	
-	fromScreen(id:=""){
-		fn:="getscreen"
-		s:=%fn%(id)
-		
-		 ;getscreenpos(getscreen(id),x,y,w,h)
-		 fn:="getscreenpos"
-		s:=%fn%(s,x,y,w,h)
-		 ;mos(s,x,y,w,h)
-		 return rect.fromChoord(x,y,w,h)
-	}
-	
 	samesize(other) {
 		if(this.w==other.w && this.h==other.h) {
 			return true
@@ -1789,6 +1790,7 @@ class rect{
 	
 	
 	isFullScreen(){
+		mos("TODO")
 		rs:=callfunc("rectfromScreen")
 		ret:= this.covers(rs)
 		;mos(rs,this,ret)
@@ -3326,20 +3328,6 @@ minimize2tray(id:=""){
 	PostMessage,0x0401,,id,,RBTrayHook
 }
 
-beforeSizeAdjusted(id,r){
-	isfullold:=isFullScreen(id)
-	isfullNew:=r.isFullScreen()
-	;mos(id,r)
-	;
-	
-	if(isfullold!=isfullNew){
-		;mos("isfullold!=isfullNew",id)
-		;callfunc("adaptShaderToSize",id,isfullNew)
-		
-	}
-			
-}
-
 isFullScreen(id){
 	rw:=new rect(id)
 	ret:=rw.isFullScreen()
@@ -3438,9 +3426,15 @@ randomizeArray(items){
 	return ret
 }
 
+getscreenFromPoint(p){
+	return getscreenFromCoord(p.x,p.y)
+}
 
+getscreenFromMouse(){
+	return getscreenFromCoord()
+}
 
-getscreen(Mx := "", My := "")
+getscreenFromCoord(Mx := "", My := "")
 {
 	if  (!Mx or !My) 
 	{
@@ -3449,7 +3443,7 @@ getscreen(Mx := "", My := "")
 		MouseGetPos, Mx, My
 	}
 
-	SysGet, MonitorCount, 80	; monitorcount, so we know how many monitors there are, and the number of loops we need to do
+	SysGet, MonitorCount, MonitorCount	; monitorcount, so we know how many monitors there are, and the number of loops we need to do
 	Loop, %MonitorCount%
 	{
 		SysGet, mon%A_Index%, Monitor, %A_Index%	; "Monitor" will get the total desktop space of the monitor, including taskbars
@@ -3463,12 +3457,14 @@ getscreen(Mx := "", My := "")
 	return ActiveMon
 }
 
-getScreenpos(monitorNumber, ByRef x,ByRef y,ByRef w,ByRef h){
-	SysGet, Monitor, Monitor, monitorNumber
+getScreenpos(monNumber, ByRef x,ByRef y,ByRef w,ByRef h){
+	SysGet, Monitor, Monitor, %monNumber%
+	;mos("nn", monNumber,MonitorLeft,MonitorTop,MonitorRight,MonitorBottom)
 	x:=MonitorLeft
 	y:=MonitorTop
 	w:=MonitorRight-x
 	h:=MonitorBottom-y
+	;mos(monNumber,  x, y, w, h)
 }
 
 getPidFromWin(id){
@@ -3508,4 +3504,8 @@ getSimpleAudioVolume(lookuppidOrName) {
 	ObjRelease(enm)
 	return retSAV
 	
+}
+
+ShowTaskbar() {
+	Send #t
 }

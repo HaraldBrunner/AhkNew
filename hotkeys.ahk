@@ -5,6 +5,7 @@ SetBatchLines, -1
 CoordMode,Mouse, Screen
 CoordMode, Pixel, Screen
 CoordMode, ToolTip, Screen
+CoordMode, Menu, Screen
 SetWinDelay,-1 ; kde functions are really nice with this, but for some window functions, it could be too fast
 
 
@@ -28,6 +29,9 @@ Default__Warn(obs*)
     Mos(callstack(),"A non-object value was improperly invoked.",obs)
 	
 }
+
+setScalingAware()
+
 "".base.__Get := "".base.__Set := "".base.__Call := Func("Default__Warn")
 maxInterval:=400
 lsc:=new KeyCounter("LShift","LShiftCount",maxInterval,maxInterval-1)  
@@ -49,6 +53,9 @@ GroupAdd, grpPlayers, ahk_exe %mpcBe64exe%
 tt("hotkeys started")
 Return
 
+
+
+
 ~*LAlt::
 	setScalingAware()
 	global gMyAlt:=true
@@ -69,21 +76,21 @@ return
 return
 
 ~*LCtrl::
-setScalingAware()
+	setScalingAware()
 	global gMyLCtrl:=true
 return
 ~*LCtrl Up::
-setScalingAware()
+	setScalingAware()
 	global gMyLCtrl:=false
 return
 
 ~*LShift::
-setScalingAware()
+	setScalingAware()
 	global gMylshift:=true
 	curcount:=lsc.keydown()
 return 
 ~*LShift up::
-setScalingAware()
+	setScalingAware()
 	global gMylshift:=false
 	lsc.keyup()
 return
@@ -100,6 +107,7 @@ f7c.keyup()
 return
 
 ~*LButton::
+setScalingAware()
 ;tt("LBUTTON")
 global gMouseButtonHit :=1
 global gMyLButtonDownpoint := point.frommouse()
@@ -107,12 +115,14 @@ global gMyLButtonDown:=true
 return
 
 ~*LButton up::
+setScalingAware()
 ;tt("LBUTTON up")
 global gMyLButtonDown:=false
 global gMyLButtonDownpoint := ""
 return
 
 RButton::
+setScalingAware()
 ;tt("RButton::")
 global gMyLButtonDown
 global menPoint
@@ -130,6 +140,7 @@ if(gMyLButtonDown){
 return
 
 ~^s::
+Sleep, 1000
 Reload
 Return
 
@@ -253,8 +264,17 @@ return
 F7Count(c,mp) {
 	;tt(c)
 	id:=getMouseWin()
+	if (0 && c==1) {
+		; screen:=getscreenFromMouse()
+		; getScreenpos(screen,x,y,w,h)
+		; mos(screen,x,y,w,h)
+		; ExplorerTestClass.___Monitor()
 
-	if (c==2) {
+		;SysGet, MonitorName, MonitorName, screen
+		;	SysGet, Monitor, Monitor, screen
+		;	SysGet, MonitorWorkArea, MonitorWorkArea, %A_Index%
+		;	MsgBox, Monitor:`t#%A_Index%`nName:`t%MonitorName%`nLeft:`t%MonitorLeft% (%MonitorWorkAreaLeft% work)`nTop:`t%MonitorTop% (%MonitorWorkAreaTop% work)`nRight:`t%MonitorRight% (%MonitorWorkAreaRight% work)`nBottom:`t%MonitorBottom% (%MonitorWorkAreaBottom% work)
+	} else if (c==2) {
 		Run, osk.exe ;, , Max|Min|Hide|UseErrorLevel, OutputVarPID]
 		
 	}Else{
@@ -269,15 +289,17 @@ F7Count(c,mp) {
 LShiftCount(c,mp) {
 	;tt(c)
 	id:=getMouseWin()
-	if (c=2) {
-		openMainMenu()
-	} else if(ismpcwin(id)) {
-		if (c==1) {
-			if (isFullscreenarea()) {
-				mpcsend_Toggle_Playlist_Bar(id)
-			}
+	
+	if(c==1) {
+		if (ismpcwin(id) && isFullscreenarea()) {
+			mpcsend_Toggle_Playlist_Bar(id)
+		} else if (isOnLeftScreenBoarder()) {
+			tt("left")
+			ShowTaskbar()
 		}
-	}
+	} else if (c=2) {
+		openMainMenu()
+	} 
 }
 
 
@@ -287,14 +309,16 @@ buildMenu() {
         dm.setParentAndAddsubmenu("RareMenu")
     }
     Menu, MyMenu, Add
-	Menu, MyMenu, Add
-    Menu, MyMenu, Add
 	locVar := getINIBoolVars()
     for index, element in locVar {
 		Menu, SetMenu, Add, %element%, INIBoolItemLab
 	}
 	Menu, MyMenu, Add,SetMenu,:SetMenu
+	Menu, MyMenu, Add,Close, MenuHandler
 }
+
+MenuHandler:
+return
 
 adjustDynMenItems() {
     temp:=readini()

@@ -170,7 +170,7 @@ class ExplorerTestClass extends DynWinSubMenu{
 
 	click(fn){
 		global menposx,menposy,menposid 
-		o:=ExplorerTestClass.instance()
+		o:=this.instance()
 		fnval:=o[fn]
 		%fnval%(o)
 
@@ -322,21 +322,37 @@ class ExplorerTestClass extends DynWinSubMenu{
 
 	___Monitor() {
 		SysGet, MonitorCount, MonitorCount
-SysGet, MonitorPrimary, MonitorPrimary
-MsgBox, Monitor Count:`t%MonitorCount%`nPrimary Monitor:`t%MonitorPrimary%
-Loop, %MonitorCount%
-{
-    SysGet, MonitorName, MonitorName, %A_Index%
-    SysGet, Monitor, Monitor, %A_Index%
-    SysGet, MonitorWorkArea, MonitorWorkArea, %A_Index%
-    MsgBox, Monitor:`t#%A_Index%`nName:`t%MonitorName%`nLeft:`t%MonitorLeft% (%MonitorWorkAreaLeft% work)`nTop:`t%MonitorTop% (%MonitorWorkAreaTop% work)`nRight:`t%MonitorRight% (%MonitorWorkAreaRight% work)`nBottom:`t%MonitorBottom% (%MonitorWorkAreaBottom% work)
-}
+		SysGet, MonitorPrimary, MonitorPrimary
+		MsgBox, Monitor Count:`t%MonitorCount%`nPrimary Monitor:`t%MonitorPrimary%
+		Loop, %MonitorCount%
+		{
+			SysGet, MonitorName, MonitorName, %A_Index%
+			SysGet, Monitor, Monitor, %A_Index%
+			SysGet, MonitorWorkArea, MonitorWorkArea, %A_Index%
+			MsgBox, Monitor:`t#%A_Index%`nName:`t%MonitorName%`nLeft:`t%MonitorLeft% (%MonitorWorkAreaLeft% work)`nTop:`t%MonitorTop% (%MonitorWorkAreaTop% work)`nRight:`t%MonitorRight% (%MonitorWorkAreaRight% work)`nBottom:`t%MonitorBottom% (%MonitorWorkAreaBottom% work)
+		}
 	}
-	
+
+	___PauseAll() {
+		ps :=getPlayerIdsOrderedTopFirst(getfilter())
+		For index, id in ps {
+			pause(id)
+		}
+	}
+
+	___PauseAll_AllScreens() {
+		ps :=getPlayerIdsOrderedTopFirst("ch")
+		For index, id in ps {
+			pause(id)
+		}
+	}
 }
 
+getfilter(){
+	return "chs"
+}
 
-class Lay extends DynWinSubMenu{
+class Lay extends ExplorerTestClass{
 
 	instance() {
 		static inst:=""
@@ -344,39 +360,6 @@ class Lay extends DynWinSubMenu{
 			inst:=new Lay()
 		}
 		return inst
-
-	}
-	inlineMenuu(){
-		return true
-	}
-	getParentMenu(){
-	
-		return "MyMenu"
-	}
-	
-	needsBuild() {
-		if (!this.frf) {
-			this.frf:=true
-			return true
-		}
-		return false
-	}
-
-	click(fn){
-		global menposx,menposy,menposid 
-		o:=Lay.instance()
-		fnval:=o[fn]
-		%fnval%(o)
-
-		;mos(o,fn)
-	}
-	
-	extactIdFromMenuItem(id){
-		return id
-	}
-	
-	id2MenuItem(id){
-		return id
 	}
 	
 	addWins(ByRef c){
@@ -388,17 +371,39 @@ class Lay extends DynWinSubMenu{
 		}
 	}
 
+	___SizeToScreen() {
+		ps :=getPlayerIdsOrderedTopFirst(getfilter())
+		mi:=ps.maxindex()
+		rect:=rectfromScreen(getscreenFromMouse())
+		rects:=Object()
+		loop %mi% 
+		{
+			rects.push(rect)
+		}
+        moveTopFirstPlayerIdsOnRects(ps,rects)
+	}
+
+	___SizeToScreen_All() {
+		ps :=getPlayerIdsOrderedTopFirst("ch")
+		mi:=ps.maxindex()
+		rect:=rectfromScreen(getscreenFromMouse())
+		rects:=Object()
+		loop %mi% 
+		{
+			rects.push(rect)
+		}
+        moveTopFirstPlayerIdsOnRects(ps,rects)
+	}
+
 	___MoveToStaple() {
-		withMinimized:=true
-		filter:= withMinimized ? "ch" :  "cmh"
-		ps :=getPlayerIdsOrderedTopFirst(filter)
-		 mi:=ps.maxindex()
+		ps :=getPlayerIdsOrderedTopFirst(getfilter())
+		mi:=ps.maxindex()
 		rects:=getstaplerects(mi)
-         moveTopFirstPlayerIdsOnRects(ps,rects,2)
+        moveTopFirstPlayerIdsOnRects(ps,rects,2)
 	}
 
 	___MoveToStapleVert() {
-		ps :=getPlayerIdsOrderedTopFirst()
+		ps :=getPlayerIdsOrderedTopFirst(getfilter())
  		mi:=ps.maxindex()
           ;        mm(mi)
 		rects:=getstapleVertrects(mi)
@@ -407,17 +412,14 @@ class Lay extends DynWinSubMenu{
 	
 
 	___MoveTo3Grid() {
-		withMinimized:=true
-		filter:= withMinimized ? "ch" :  "cmh"
-		ps :=getPlayerIdsOrderedTopFirst(filter)
+		ps :=getPlayerIdsOrderedTopFirst(getfilter())
 		mi:=ps.maxindex()
 		rects:=get3gridrects(mi)
          layoutPlayers(ps,rects)
 	}
 
 	___MoveTo4Grid() {
-		filter:= withMinimized ? "ch" :  "cmh"
-		ps :=getPlayerIdsOrderedTopFirst(filter)
+		ps :=getPlayerIdsOrderedTopFirst(getfilter())
 		mi:=ps.maxindex()
 		;        mm(mi)
 		rects:=get4gridrects(mi)
@@ -425,14 +427,13 @@ class Lay extends DynWinSubMenu{
 	}
 
 	___MoveToGrid() {
-		withMinimized:=true
-		filter:= withMinimized ? "ch" :  "cmh"
-		pso :=getPlayerIdsOrderedTopFirst(filter)
+		pso :=getPlayerIdsOrderedTopFirst(getfilter())
 		;mos(pso)
 		rects:=getgridrects(pso.maxindex())
 		layoutPlayers(pso,rects)
 	}
 }
+
 
 class moveToMenu extends DynWinSubMenu{
 	;this.needsB := true
@@ -989,6 +990,13 @@ isFullscreenarea(mp:=""){
 	return isWinBottomBoarder("",60,mp)
 }
 
+isOnLeftScreenBoarder() {
+	getScreenpos(getscreenFromMouse(),x,y,w,h)
+	MouseGetPos,mx,my,id
+	ret := mx == x
+	return ret
+}
+
 runkb() {
 	;DllCall("Wow64DisableWow64FsRedirection", "uint*", OldValue)
 	;Run,%windir%\system32\osk.exe
@@ -1028,43 +1036,36 @@ calcCount2ColsRows(N,ByRef cols,ByRef rows) {
 }
 
 getgridrects(i) {
-	
 	if (i=3) {
 		return get3gridrects()
 	}
-	;calcCount2ColsRows(i, cs, rs)
 	calcCount2ColsRows(i, rs, cs)
-	;
 	
-	getscreenpos(getscreen(),x,y,w,h)
+	getscreenpos(getscreenFromMouse(),x,y,w,h)
 	iw:=round(w/cs)
 	ih:=Round(h/rs)
 	rects:=Object()
 	cols:=1
-	;mos(i, rs, cs,x,y,w,h)
+	;mos(i, rs, cs,x,y,w,h, iw, ih)
 	
 	while(cols<=cs) {
 		rows:=1
 		while(rows<=rs) {
-			x:=(cols-1)*iw
-			y:=(rows-1)*ih
-			w:=iw
-			h:=ih
-			r:=rect.fromChoord(x,y,w,h)
-
+			xr:=x+(cols-1)*iw
+			yr:=y+(rows-1)*ih
+			r:=rect.fromChoord(xr,yr,iw,ih)
 			rects.push(r)
 			rows++
 		}
 
 		cols++
 	}
+	;mos(rects)
 	return rects
 }
 
 get3gridrects(i:=3) {
-	
-	
-	getscreenpos(getscreen(),x,y,w,h)
+	getscreenpos(getscreenFromMouse(),x,y,w,h)
 	iw:=round(w/cs)
 	ih:=Round(h/rs)
 	rects:=Object()
@@ -1097,10 +1098,7 @@ get4gridrects(i) {
 	if (i=3) {
 		return get3gridrects()
 	}
-	;calcCount2ColsRows(i, cs, rs)
-	;str := s(i,cs, rs,newline())
-	
-	getscreenpos(getscreen(),x,y,w,h)
+	getscreenpos(getscreenFromMouse(),x,y,w,h)
 	iw:=w/2
 	ih:=h/2
 	rects:=Object()
@@ -1117,38 +1115,25 @@ get4gridrects(i) {
 		iy:=y+(modi2*ih)
 
 		r:=rect.fromChoord(ix,iy,iw,ih)
-		;mm(str tos(r))
 		rects.push(r)
-		
-
-		
 	}
 	return rects
 }
 
 
 getstaplerects(i) {
-	;calcCount2ColsRows(i, cs, rs)
-	;str := s(i,cs, rs,newline())
-	
-	getscreenpos(getscreen(),x,y,w,h)
+	getscreenpos(getscreenFromMouse(),x,y,w,h)
 	iw:=w
 	ih:=h/2
 	rects:=Object()
 	cols:=1
-	loop %i% ;while(cols<=cs) 
+	loop %i% 
 	{
 		modi:=mod(A_Index-1, 2)
-		
 		ix:=x
-		iy:=(modi)*ih
-
+		iy:=y+(modi)*ih
 		r:=rect.fromChoord(ix,iy,iw,ih)
-		;mm(str tos(r))
 		rects.push(r)
-		
-
-		
 	}
 	return rects
 }
@@ -1156,30 +1141,18 @@ getstaplerects(i) {
 
 
 getstapleVertrects(i) {
-	;calcCount2ColsRows(i, cs, rs)
-	;str := s(i,cs, rs,newline())
-	
-	getscreenpos(getscreen(),x,y,w,h)
+	getscreenpos(getscreenFromMouse(),x,y,w,h)
 	iw:=w/2
 	ih:=h
 	rects:=Object()
 	cols:=1
-	loop %i% ;while(cols<=cs) 
+	loop %i% 
 	{
-		;modi:=mod(A_Index-1, 2)
 		modi:=mod(A_Index, 2)
-		
 		iy:=y
-		ix:=(modi)*iw
-		
-		
-
+		ix:=x+(modi)*iw
 		r:=rect.fromChoord(ix,iy,iw,ih)
-		;mm(str tos(r))
-		rects.push(r)
-		
-
-		
+		rects.push(r)	
 	}
 	return rects
 }
@@ -1222,30 +1195,14 @@ getPlayerIdsOrderedTopFirst(filter:="cmh"){
 	if(InStr(filter,"h")){
 		ret :=getNonHidden(ret)
 	}
+	if(InStr(filter,"s")){
+		ret :=getNoOtherScreen(ret)
+	}
 	
 	return ret
 }
 
-layoutPlayers(pso,rects,playlast:=""){
-	;fpathOrder:="C:\ProgrammeUser\AHK\AutoHotkeyResistents\MoveToGrid"
-	fPathBL:="C:\ProgrammeUser\AHK_New\playersBeforeLay"
-	;ps :=retainOldOrder(pso,fpathOrder)
-	ps:=pso
-	; mos(ps,rects)
-	OnRects:=arePlayerIdsOnRects(ps,rects)
 
-	if (OnRects) {
-		tt("restore")
-		oldplObj:=ObjFromFile(fPathBL)
-		;movepid2WinRect(oldplObj)
-		moveTopFirstPlayerIdsOnRectsOfObjs(oldplObj,Object())
-	} else {
-		;array2file(pso,fpathOrder)
-		ObjtoFile(getPlayerObjsOrderedTopFirst("."),fPathBL)
-		;mos(ps,rects)
-		moveTopFirstPlayerIdsOnRects(ps,rects,playlast)
-	}
-}
 
 moveTopFirstPlayerIdsOnRectsOfObjs(playerObjs,playlast:=""){
 	ids:=Object()
@@ -1258,6 +1215,12 @@ moveTopFirstPlayerIdsOnRectsOfObjs(playerObjs,playlast:=""){
 	moveTopFirstPlayerIdsOnRects(ids,rects,playlast)
 }
 
+
+layoutPlayers(pso,rects,playlast:=""){
+	ps:=pso
+	moveTopFirstPlayerIdsOnRects(ps,rects,playlast)
+
+}
 
 moveTopFirstPlayerIdsOnRects(ps,rects,playlast:="") {
     if (playlast=="") {
@@ -1282,7 +1245,6 @@ moveTopFirstPlayerIdsOnRects(ps,rects,playlast:="") {
 				pause(id)
 			}
 		}else{
-	
 			if ((playlast!="") && (index > plAfter)) {
 				;play(id)
 			} else {
@@ -1296,10 +1258,9 @@ moveTopFirstPlayerIdsOnRects(ps,rects,playlast:="") {
 	For index, id in ps {
 		r:=rects[mi+1-index]
 		;        mm(s(r))
-		assureNotMinimizedPlayer(id)
-		beforeSizeAdjusted(id,r)
+		;assureNotMinimizedPlayer(id)
 		move2Rect(id,r)
-		setTopmostRight(id)
+		;setTopmostRight(id)
 		;mpcsend_PnS_Reset(id)
 		;        mpcsend_VidFrm_Inside(id)
 		;mpcsend_VidFrm_outside(id)
@@ -1373,7 +1334,7 @@ move2Rect(id,r){
 }
 
 setTopmostRight(id){
-	rs:=rectfromScreen(getscreen(id))
+	rs:=rectfromScreen(getscreenFromPoint(new rect(id).getCenter()))
 	r:=new rect(id)
 	wi:=getwininfobase(id)
 	full:=r.equal(rs)
@@ -1424,12 +1385,8 @@ ctToTop() {
     }
 }
 
-rectfromScreen(Screen:="") {
+rectfromScreen(Screen) {
 	;mos(screen)
-	if (screen=="") {
-		Screen:=getScreen()
-		;mos(screen)
-	}
 	getScreenPos(Screen,x,y,w,h)
 	ret:= new rect()
 	ret.x:=x
