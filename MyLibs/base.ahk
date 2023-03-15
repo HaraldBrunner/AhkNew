@@ -1289,7 +1289,9 @@ getParent(id){
 }
 
 setScalingAware() {
-	DllCall("SetThreadDpiAwarenessContext", "ptr", -3, "ptr")
+	DllCall("SetThreadDpiAwarenessContext", "ptr", -2, "ptr")
+	; -2 is not per monitor aware
+	; -3 and -4 is per monitor aware. But the menu does not work correctly on another screen. It was told that ahk is not per monitor aware
 }
 
 getctid(only:=false){
