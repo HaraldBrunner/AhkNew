@@ -59,7 +59,7 @@ Return
 ~*LAlt::
 	setScalingAware()
 	global gMyAlt:=true
-	activateOther()
+	
 	curcount:=lac.keydown()
 	id:=getMouseWin()
 	if (curcount==1 && ismpcwin(id)) {
@@ -68,6 +68,7 @@ Return
 		cb:=new MouseTrackerCBLAlt()
 		MouseTracker.instance().track(cb, keys)
 	}
+	activateOther()
 return
 ~*LAlt up::
 	setScalingAware()
@@ -198,6 +199,19 @@ setScalingAware()
 googlesearch()
 return
 
+;=========================================================================
+;=========================================================================
+#If isMpcWinWithCtrlCheck() && IsTopOrBottomArea() && !IsLeftOrRightArea()
+
+
+WheelUp::
+wheelIsTopOrBottomArea(true)
+return
+
+WheelDown::
+wheelIsTopOrBottomArea(false)
+return
+
 
 ;=========================================================================
 ;=========================================================================
@@ -214,6 +228,16 @@ return
 	setScalingAware()
 	;tt("!WheelDown") 
 	sizeplayer(getctid(),false)
+return
+
+^!WheelUp::
+id:=getctid()
+loopSound(true,true,false)
+return
+
+^!WheelDown::
+id:=getctid()
+loopSound(false,true,false)
 return
 
 !F7::

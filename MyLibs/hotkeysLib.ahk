@@ -966,6 +966,98 @@ getmenuid(){
 	return id
 }
 
+boarderWith(id:=""){
+	px:=20
+	if (id=="") {
+		return px
+	}
+	r:=new rect(id)
+	b:=(r.h + r.w) / 2 *boarderRel()
+	return b
+}
+
+boarderRel(big:=false){
+	if(big){
+		return 0.15
+	}
+	return 0.05
+}
+
+isWinUpperBoarder(id:="",boarder:=""){
+	if (id=="") {
+		id:=getctid()
+	}
+	if (boarder=="") {
+		boarder:=boarderWith(id)
+	}
+	MouseGetPos,,my,
+	WinGetPos,,y,,h,ahk_id %id%
+	dif:=my-y
+	;difabs:=Abs(dif)
+	ret:=(dif < boarder)
+	;ToolTip %dif% %ret%
+	return ret
+}
+
+isWinLeftBoarder(id:="",boarder:=20){
+	if (id=="") {
+		id:=getctid()
+	}
+	MouseGetPos,mx
+
+	WinGetPos,x,y,w,h,ahk_id %id%
+	dif:=mx-x
+	
+	ret:=(dif < boarder)
+	return ret
+}
+
+isWinRightBoarder(id:="",boarder:=20){
+	if (id=="") {
+		id:=getctid()
+	}
+	MouseGetPos,mx,my,id
+	id:=getctid()
+	WinGetPos,x,y,w,h,ahk_id %id%
+	dif:=x+w-mx
+	
+	ret:=(dif < boarder)
+	return ret
+}
+
+isWinUpperOrBottomBoarder(id:="",boarder:=""){
+	if (id=="") {
+		id:=getctid()
+	}
+	if (boarder=="") {
+		boarder:=boarderWith(id)
+	}
+	return isWinUpperBoarder(id,boarder)||isWinBottomBoarder(id,boarder)
+}
+isWinLeftOrRightBoarder(id:="",boarder:=""){
+	if (id=="") {
+		id:=getctid()
+	}
+	if (boarder=="") {
+		boarder:=boarderWith(id)
+	}
+	return isWinLeftBoarder(id,boarder)||isWinRightBoarder(id,boarder)
+}
+isOnSearchBar(){
+	MouseGetPos,,my,id
+	if (isMpcWin(id)) {
+		id:=getctid()
+		WinGetPos,,y,,h,ahk_id %id%
+		dif:=y+h-my
+		difabs:=Abs(dif)
+		ret:=(difabs < 20)
+		;ToolTip %dif% %ret%
+		return ret
+
+	}
+}
+
+
 isWinBottomBoarder(id:="", boarder:=60,mp:=""){
 	if (id=="") {
 		id:=getctid()
@@ -990,12 +1082,161 @@ isFullscreenarea(mp:=""){
 	return isWinBottomBoarder("",60,mp)
 }
 
+
+
 isOnLeftScreenBoarder() {
 	getScreenpos(getscreenFromMouse(),x,y,w,h)
 	MouseGetPos,mx,my,id
 	ret := mx == x
 	return ret
 }
+
+isleftscreenboarder(mp:=""){
+
+	if(mp!=""){
+		x:=mp.x
+		y:=mp.y
+		id:=mp.id
+	}else{
+		MouseGetPos,x,y,id
+	}
+	
+	getScreenPos(getscreenFromId(id),sx,sy,w,h)
+
+	if(x==sx) {
+		ret:= true
+	}else{
+		ret:=false
+	}
+	 ret:=ret||isWinLeftBoarder()
+	 return ret
+}
+
+isrightscreenboarder(mp:=""){
+
+	if(mp!=""){
+		x:=mp.x
+		y:=mp.y
+		id:=mp.id
+	}else{
+MouseGetPos,x,y,id
+	}
+	
+	getScreenPos(getscreenFromId(id),sx,sy,w,h)
+	;ttos(x,sx,w)
+	if(x==sx+w-1) {
+		;tt(true)
+		ret:= true
+	}else{
+		ret:=false
+	}
+	 ret:=ret||isWinRightBoarder()
+	 return ret
+}
+
+
+IsLeftOrRightArea(){
+	return isleftscreenboarder() ||isrightscreenboarder()
+}
+
+IsTopOrBottomArea(mp:=""){
+	return isFullscreenarea(mp) ||  IsOverTopScreenline(mp)
+}
+
+
+boarder(){
+	return 80
+}
+
+
+IsOverRightScreenline(mp:=""){
+	if(mp!=""){
+		mx:=mp.x
+		id:==mp.id
+	}else{
+		MouseGetPos ,mx,,id
+	}
+	
+	getscreenpos(getscreenFromId(id),x,y,w,h)
+	;ToolTip, %mx% %x%
+	d:=(x+w-1)-mx
+	
+	b:=boarder()
+	;ttos(x,mx,d)
+if (d<b) {
+	ret:= true
+}else{
+	ret:= false
+}
+;ttos(ret)
+return ret
+}
+IsOverLeftScreenline(mp:=""){
+	if(mp!=""){
+		mx:=mp.x
+	}else{
+		MouseGetPos ,mx
+	}
+	
+	getscreenpos(getscreenFromMouse(),x,y,w,h)
+	;ToolTip, %mx% %x%
+	d:=mx-x
+	b:=boarder()
+	
+if (d<b) {
+	ret:= true
+}else{
+	ret:= false
+}
+;ttos(ret)
+return ret
+}
+
+IsOverScreenline(mp:=""){
+if(mp!=""){
+	mx:=mp.x
+	my:=mp.y
+	id:=mp.id
+}else{
+	MouseGetPos ,mx,my,id
+}
+
+getscreenpos(getscreenFromId(id),x,y,w,h)
+;ToolTip, %mx% %x%
+if (mx==x||mx==x+w-1||my==y||my==y+h-1) {
+	ret:= true
+}else{
+	ret:= false
+}
+ret:=ret||isWinUpperBoarder()
+return ret
+}
+
+
+IsOverTopScreenline(mp:=""){
+if(mp!=""){
+	mx:=mp.x
+	my:=mp.y
+	id:=mp.id
+}else{
+	MouseGetPos ,mx ,my ,id
+}
+	
+
+	
+if (my==1080||my==0) {
+	ret:= true
+}else{
+	ret:= false
+}
+ret:=ret||isWinUpperBoarder(id)
+if (ret) {
+	getscreenpos(getscreenFromMouse(),x,y,w,h)
+	
+}
+return ret
+}
+
 
 runkb() {
 	;DllCall("Wow64DisableWow64FsRedirection", "uint*", OldValue)
@@ -1537,4 +1778,179 @@ v2(){
 		v2:=new v2Man()
 	}
 	return v2
+}
+
+loopSound(doUp,allScreensmod,meToo) {
+
+    ;    tt("loopSound")
+    loopSoundallScreens := readini()["loopSoundallScreens"]
+    
+allScreens:=allScreensmod || loopSoundallScreens
+
+
+     ;    ToolTip %doUp% %allScreens%
+    mousegetpos,x ,y,myid
+
+myscreen:=getscreenFromId(myid)
+ myclass:=getclass(myid)
+    if (!x) {
+myid:=0
+ myscreen:=0
+      }
+
+      static gPlayerWins
+  static gLastCall :=0
+
+   nt:=A_TickCount
+    if (nt-gLastCall>3000 || !IsObject(gPlayerWins)) {
+        ;        tt("newBuild")
+
+gPlayerWins:=Object()
+        For id, value in getPlayers() {
+screen:=getscreenFromId(id)
+ scrok:=allScreens ? true : myscreen==screen
+            if (meToo || id != myid && scrok) {
+                gPlayerWins.push(id)
+            }
+        }
+    }
+gLastCall :=nt
+
+    for index, id in gPlayerWins {
+    if (doUp) {
+            mpcsend_Volume_Up(id)
+        } else {
+            mpcsend_Volume_Down(id)
+        }
+    }
+
+    return
+
+
+}
+
+getPlayers(){
+	ret:=Object()
+	For index, id in getPlayerIdsOrderedTopFirst("h"){
+		ret[id]:=1
+	}
+
+	return ret
+}
+
+
+wheelIsTopOrBottomArea(up) {
+	id:=getctid()
+	 fast:=isBoarderPixelBottom() ||isBoarderPixelTop()
+      mpcStep(id,up,fast,false,getLoopc(true))
+ }
+
+ isBoarderPixelBottom(){
+	MouseGetPos,x,y
+	getScreenpos(getscreenFromMouse(),  sx,  sy,  sw, sh )
+	return y==sy+sh-1
+}
+
+isBoarderPixelTop(){
+	MouseGetPos,x,y
+	getScreenpos(getscreenFromMouse(),  sx,  sy,  sw, sh )
+	return y==sy
+}
+isBoarderPixelRight(){
+	MouseGetPos,x,y
+	getScreenpos(getscreenFromMouse(),  sx,  sy,  sw, sh )
+	return x==sx+sw-1
+}
+
+ isBoarderPixelLeft(){
+	MouseGetPos,x,y
+	getScreenpos(getscreenFromMouse(),  sx,  sy,  sw, sh )
+	return x==sx
+}
+
+
+mpcStep(id,forward, fast:=false, byframe:=false,loopc:=1,vfast:=false) {
+    ;cid:=getSeekbar(id)
+     ;r:=new rect(cid)
+    mousegetpos,mx,my
+    WinGetPos,x,y,w,h,ahk_id %id%
+x2:=x+3
+ y2:=y+h-3
+      ;    MouseMove,x2,y2,0
+    ;    ControlMouseMove(X2, Y2, "", "ahk_id" %id%)
+
+cid:=ID
+     ;cid:=
+
+        ;    PostMessage, 0x200, 0, x2 &0xFFFF | y2 <<16,, ahk_id %cid% ;WM_MOUSEMOVE
+    
+    ;    Sleep 1000
+
+
+
+
+
+    ;    ttt("mpcStep",forward,  fast, byframe,loopc)
+    ;    tt(loopc)
+    if (loopc>18) {
+        ;        tt("loopc>")
+fast:=true
+     }
+    if (loopc>23) {
+        ;        tt("loopc>")
+vfast:=true
+     }
+
+ byframe:=false
+
+    loop 1 {
+        if (byframe) {
+            ;            ttt5()
+            if (forward) {
+                mpcsend_Framestep(id)
+            } else {
+                mpcsend_Framestep_back(id)
+            }
+            global AfterByFrameid
+AfterByFrameid:=id
+             SetTimer,AfterByFrame,-2000
+        } else if (vfast) {
+            if (forward) {
+                mpcsend_Jump_Forward_large(id)
+            } else {
+                mpcsend_Jump_Backward_large(id)
+            }
+        }
+
+        else if (fast) {
+            if (forward) {
+                mpcsend_Jump_Forward_medium(id)
+            } else {
+                mpcsend_Jump_Backward_medium(id)
+            }
+        } else {
+            if (forward) {
+                mpcsend_Jump_Forward_small(id)
+            } else {
+                mpcsend_Jump_Backward_small(id)
+            }
+        }
+    }
+    ;SetTimer,moveMouseSeekCurTimer,-100
+    return
+
+
+        AfterByFrame:
+            global AfterByFrameid
+            normsound_play(AfterByFrameid)
+
+            return
+                ;    MouseMove,mx,my,0
+}
+
+normsound_play(id){
+	v2().normsound(id) ;,alreadymute)
+   
+   play(id)
+
 }

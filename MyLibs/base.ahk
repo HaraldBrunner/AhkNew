@@ -328,7 +328,7 @@ getNoOtherScreen(ids){
 	ret:=Object()
 	for index,id in ids{
 		
-		If (getscreenFromMouse() == getscreenFromPoint( new rect(id).getCenter())) { 
+		If (getscreenFromMouse() == getscreenFromId(id)) { 
 			ret.push(id)
 		}
 	}
@@ -3431,6 +3431,11 @@ randomizeArray(items){
 getscreenFromPoint(p){
 	return getscreenFromCoord(p.x,p.y)
 }
+
+getscreenFromId(id){
+	return getscreenFromPoint( new rect(id).getCenter())
+}
+
 
 getscreenFromMouse(){
 	return getscreenFromCoord()
