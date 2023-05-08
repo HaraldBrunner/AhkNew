@@ -1304,7 +1304,7 @@ getctid(only:=false){
 	if(isObject(gCtId)){
 		id := getRoot(gCtId.id)
 	}else if (!only) {
-		id:=getWindowFromPoint(point.frommouse())
+		MouseGetPos,,,id
 		id:=getRoot(id)
 	}
 	;tt(getWinInfobase(id))
@@ -2600,37 +2600,11 @@ mpcSend(msg,id:="",post:=false) {
 	;
 }
 
-getWindowFromPointExact(x,y) {
-
-	
-	x:=Round(x)
-	y:=Round(y)
-
-	; ttos(x,y,callstack())
-	
-	if (Is64Bit()) {
-		if( !isInteger(x) || !isInteger(y)    ){
-			mos(x,y)
-		}
-		Old_IsCritical := A_IsCritical 
-		Critical,100
-		VarSetCapacity(xt,8)
-		VarSetCapacity(yt,8)
-		VarSetCapacity(p,8)
-		xt:=x
-		yt:=y
-		p:= xt | (yt << 32)
-		VarSetCapacity(id,8)
-		id := DllCall("WindowFromPoint", "int64", p, "ptr")
-		;id := DllCall("WindowFromPoint", "int64", x | (y << 32), "ptr")
-		Critical %Old_IsCritical%
-	}
-	else {
-		id:= DllCall( "WindowFromPoint", "int", x, "int", y )
-
-	}
-	
-	return id
+getWindowFromPointExact(x,y) { ; this works with negative coords !!!!!
+	VarSetCapacity(POINT, 8)
+	Numput(x, POINT, 0, "int")
+	Numput(y, POINT, 4, "int")
+	return DllCall("WindowFromPoint", int64, NumGet(POINT, 0, "int64"))
 }
 
 
@@ -2641,11 +2615,13 @@ getWindowFromPoint(x,y:="") {
 	}
 	x:=x+0
 	y:=y+0
-	id:= getWindowFromPointExact(x,y)
-	
-	rid:= getRootWin(id)
+	cid:= getWindowFromPointExact(x,y)
+	id := DllCall("GetAncestor", Ptr, cid, UInt, GA_ROOT := 2, Ptr)
+	;ttos(x,y,id)
+	;rid:= getRootWin(id)
+	;ttos(id,rid)
 	; ttos("getWindowFromPoint",x,y,getWinInfobase(id),getWinInfobase(rid))
-	return rid
+	return id
 }
 
 

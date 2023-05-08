@@ -1009,6 +1009,7 @@ isWinLeftBoarder(id:="",boarder:=20){
 	dif:=mx-x
 	
 	ret:=(dif < boarder)
+	;ttos(id, x, mx, dif)
 	return ret
 }
 
@@ -1058,16 +1059,13 @@ isOnSearchBar(){
 }
 
 
-isWinBottomBoarder(id:="", boarder:=60,mp:=""){
+isWinBottomBoarder(id:="", boarder:=60){
 	if (id=="") {
 		id:=getctid()
 	}
-	if(mp!=""){
-		my:=mp.y
-		id:=mp.id
-	}else{
-		MouseGetPos,,my,id
-	}
+	
+	MouseGetPos,,my,id
+
 
 
 	WinGetPos,,y,,h,ahk_id %id%
@@ -1078,8 +1076,8 @@ isWinBottomBoarder(id:="", boarder:=60,mp:=""){
 	return ret
 }
 
-isFullscreenarea(mp:=""){
-	return isWinBottomBoarder("",60,mp)
+isFullscreenarea(){
+	return isWinBottomBoarder("",60)
 }
 
 
@@ -1091,16 +1089,8 @@ isOnLeftScreenBoarder() {
 	return ret
 }
 
-isleftscreenboarder(mp:=""){
-
-	if(mp!=""){
-		x:=mp.x
-		y:=mp.y
-		id:=mp.id
-	}else{
-		MouseGetPos,x,y,id
-	}
-	
+isleftscreenboarder(){
+	MouseGetPos,x,y,id
 	getScreenPos(getscreenFromId(id),sx,sy,w,h)
 
 	if(x==sx) {
@@ -1108,20 +1098,14 @@ isleftscreenboarder(mp:=""){
 	}else{
 		ret:=false
 	}
+	;ttos(ret)
 	 ret:=ret||isWinLeftBoarder()
+	 
 	 return ret
 }
 
-isrightscreenboarder(mp:=""){
-
-	if(mp!=""){
-		x:=mp.x
-		y:=mp.y
-		id:=mp.id
-	}else{
-MouseGetPos,x,y,id
-	}
-	
+isrightscreenboarder(){
+	MouseGetPos,x,y,id
 	getScreenPos(getscreenFromId(id),sx,sy,w,h)
 	;ttos(x,sx,w)
 	if(x==sx+w-1) {
@@ -1136,11 +1120,14 @@ MouseGetPos,x,y,id
 
 
 IsLeftOrRightArea(){
-	return isleftscreenboarder() ||isrightscreenboarder()
+	ret:=isleftscreenboarder() ||isrightscreenboarder()
+	;ttos(ret)
+	return ret
 }
 
-IsTopOrBottomArea(mp:=""){
-	return isFullscreenarea(mp) ||  IsOverTopScreenline(mp)
+IsTopOrBottomArea(){
+	ret:=isFullscreenarea() ||  IsOverTopScreenline()
+	return ret
 }
 
 
@@ -1213,28 +1200,15 @@ return ret
 }
 
 
-IsOverTopScreenline(mp:=""){
-if(mp!=""){
-	mx:=mp.x
-	my:=mp.y
-	id:=mp.id
-}else{
-	MouseGetPos ,mx ,my ,id
-}
-	
+IsOverTopScreenline(){
 
-	
-if (my==1080||my==0) {
-	ret:= true
-}else{
-	ret:= false
-}
-ret:=ret||isWinUpperBoarder(id)
-if (ret) {
+	MouseGetPos ,mx ,my ,id	
+
 	getscreenpos(getscreenFromMouse(),x,y,w,h)
-	
-}
-return ret
+	ret:= my==y
+	ret:=ret||isWinUpperBoarder(id)
+	;ttos(ret)
+	return ret
 }
 
 
