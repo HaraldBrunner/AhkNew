@@ -126,17 +126,19 @@ kdeMouseMove(key,activateKey) {
 		GetKeyState,KDE_Button,%key% ,P ; Break if button has been released.
 		If KDE_Button = U
 			break
-		GetKeyState,theActivateKey,%activateKey% ,P ; Break if button has been released.	
+		GetKeyState,theActivateKey,%activateKey% ,P 	
 			
 		MouseGetPos,KDE_X2,KDE_Y2 ; Get the current mouse position.
-		KDE_X2 -= KDE_X1 ; Obtain an offset from the initial mouse position.
-		KDE_Y2 -= KDE_Y1
+		mouseDiffX := KDE_X2 - KDE_X1 ; Obtain an offset from the initial mouse position.
+		mouseDiffY := KDE_Y2 - KDE_Y1
 		for index, mw in wins {
 			KDE_id:=mw.id
 					
-			KDE_WinX2 := (mw.w.rect.x + KDE_X2) ; Apply this offset to the window position.
-			KDE_WinY2 := (mw.w.rect.y + KDE_Y2)
-			WinMove,ahk_id %KDE_id%,,%KDE_WinX2%,%KDE_WinY2% ; Move the window to the new position.
+			KDE_WinX2 := (mw.w.rect.x + mouseDiffX) ; Apply this offset to the window position.
+			KDE_WinY2 := (mw.w.rect.y + mouseDiffY)
+			width := mw.w.rect.w
+			heigth := mw.w.rect.h
+			WinMove,ahk_id %KDE_id%,,%KDE_WinX2%,%KDE_WinY2%,%width%,%heigth% ; Move the window to the new position.
 
 			If theActivateKey = D
 				WinActivate,ahk_id %KDE_id%
@@ -189,6 +191,10 @@ kdeMouseResizeMulti(key) {
             break
         MouseGetPos,KDE_X2,KDE_Y2 ; Get the current mouse position.
         
+		xDif := KDE_X2 - KDE_X1 ; Obtain an offset from the initial mouse position.
+		yDif := KDE_Y2 - KDE_Y1
+
+		
         for index, mw in wins {
 			KDE_id:=mw.id
             ;mos(mw,"mw in loop")
@@ -198,24 +204,14 @@ kdeMouseResizeMulti(key) {
 			
 			ZeroIfonlyx := onlyx ? 0 : 1
 			ZeroIfonlyy := onlyy ? 0 : 1
-			
-            WinGetPos,KDE_WinX1,KDE_WinY1,KDE_WinW,KDE_WinH,ahk_id %KDE_id%
-			;mos(KDE_WinX1,KDE_WinY1,KDE_WinW,KDE_WinH)
-          
-            xDif := KDE_X2 - KDE_X1 ; Obtain an offset from the initial mouse position.
-            yDif := KDE_Y2 - KDE_Y1
-            ; Then, act according to the defined region.,
-            X:=KDE_WinX1 + (mw.KDE_WinLeft+1) / 2 * xDif * ZeroIfonlyy
-            Y:=KDE_WinY1 + (mw.KDE_WinUp +1) / 2 * yDif * ZeroIfonlyx
-            W:=KDE_WinW - mw.KDE_WinLeft  		* xDif * ZeroIfonlyy
-            H:=KDE_WinH  - mw.KDE_WinUp  		* yDif * ZeroIfonlyx
-            WinMove,ahk_id %KDE_id%,,x   ; X of resized window
-                                        ,y   ; Y of resized window
-                                        ,w   ; W of resized window
-                                        ,h   ; H of resized window
 
+            X:=mw.w.rect.x + (mw.KDE_WinLeft+1) / 2 * xDif * ZeroIfonlyy
+            Y:=mw.w.rect.y + (mw.KDE_WinUp +1) / 2 * yDif * ZeroIfonlyx
+            W:=mw.w.rect.w - mw.KDE_WinLeft  		* xDif * ZeroIfonlyy
+            H:=mw.w.rect.h - mw.KDE_WinUp  		* yDif * ZeroIfonlyx
+
+			;ttos(lc, KDE_X1,KDE_Y1, xDif,yDif,X)
+            WinMove,ahk_id %KDE_id%,,%X%,%Y%,%W%,%H%  
         }
-        KDE_X1 := KDE_X2 ; Reset the initial position for the next iteration.
-        KDE_Y1 := KDE_Y2
     }
 }
