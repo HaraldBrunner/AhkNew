@@ -1928,3 +1928,21 @@ normsound_play(id){
    play(id)
 
 }
+
+toggleTaskbarHidestate() {
+ 
+	ABM_GETSTATE    := 4
+	ABM_SETSTATE    := 10
+   
+	 VarSetCapacity( APPBARDATA, 36, 0 )
+	 Off :=  NumPut(  36, APPBARDATA    ) 
+	 Off :=  NumPut( WinExist("ahk_class Shell_TrayWnd"), Off+0 )
+   
+	 state := DllCall("Shell32.dll\SHAppBarMessage",UInt,ABM_GETSTATE ,UInt, &APPBARDATA )
+	 state := state ^ 1
+	 NumPut(state, Off+24 )
+	 DllCall("Shell32.dll\SHAppBarMessage",UInt,ABM_SETSTATE ,UInt, &APPBARDATA )
+	 hideon:=state & 1
+	 tt(hideon ? "hide on":"hide off")
+	 return hideon
+   }
