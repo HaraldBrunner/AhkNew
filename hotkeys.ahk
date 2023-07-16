@@ -111,7 +111,6 @@ return
 setScalingAware()
 ;tt("LBUTTON")
 global gMouseButtonHit :=1
-global gMyLButtonDownpoint := point.frommouse()
 global gMyLButtonDown:=true
 return
 
@@ -119,7 +118,6 @@ return
 setScalingAware()
 ;tt("LBUTTON up")
 global gMyLButtonDown:=false
-global gMyLButtonDownpoint := ""
 return
 
 RButton::
@@ -127,7 +125,7 @@ setScalingAware()
 ;tt("RButton::")
 global gMyLButtonDown
 global menPoint
-menPoint:=point.frommouse()
+menPoint:=Point.fromMouse()
 if(gMyLButtonDown){
 	KeyWait, LButton, L
 	KeyWait, RButton, L

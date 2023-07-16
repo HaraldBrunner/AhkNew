@@ -1476,7 +1476,7 @@ rotateDegrees(angleStart,angleOffset){
 	return normalized
 }
 
-class point{
+class Point{
 	__New(x:="",y:="",id:=""){
 		if (x==""||y=="") {
 			MouseGetPos,x,y
@@ -1501,18 +1501,18 @@ class point{
 	}
 	
 	subst(o){
-		return new point(this.x-o.x,this.y-o.y)
+		return new Point(this.x-o.x,this.y-o.y)
 	}
 
 	add(o){
-		return new point(this.x+o.x,this.y+o.y)
+		return new Point(this.x+o.x,this.y+o.y)
 	}
 mul(f){
-		return new point(this.x*f,this.y*f)
+		return new Point(this.x*f,this.y*f)
 	}
 	
 	round(){
-		return new point(round(this.x),Round(this.y))
+		return new Point(round(this.x),Round(this.y))
 	}
 	equal(o){
 		return (this.x==o.x &&		this.y==o.y)
