@@ -125,7 +125,7 @@ setScalingAware()
 ;tt("RButton::")
 global gMyLButtonDown
 global menPoint
-menPoint:=Point.fromMouse()
+menPoint:=getPointFromMouse()
 if(gMyLButtonDown){
 	KeyWait, LButton, L
 	KeyWait, RButton, L

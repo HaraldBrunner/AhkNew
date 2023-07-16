@@ -39,7 +39,7 @@ class KeyCounter{
 		this.priorKey:=A_ThisHotkey
 		if (this.downCount==0) {
 			this.mouseButtonHit :=0
-			this.mpos:=Point.frommouse()
+			this.mpos:=ClassPoint.frommouse()
 		}
 		this.downCount:=this.downCount+1
 		;tt("newdc" . this.downCount)
@@ -57,7 +57,7 @@ class KeyCounter{
 		}
 		
 
-		pm:=Point.frommouse()
+		pm:=ClassPoint.frommouse()
 		if(this.mpos){
 			dist:=this.mpos.dist(pm)
 		}

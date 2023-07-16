@@ -899,7 +899,7 @@ getctwinsFromPoint(p,onlyOne:=false,aboveId:=""){
 
 getSinglectwinFromPoint(p :="",aboveId:=""){
 	if(!p){
-		p:=new Point()
+		p:=new ClassPoint()
 	}
 	;ttt(p)
 	ctwins:=getctwinsFromPoint(p,true,aboveId)
@@ -918,7 +918,7 @@ clearGCtidIfOutdated(){
 	global sender
 	
 	if(isObject(gCtId)){
-		pt:=point.frommouse()
+		pt:=getPointFromMouse()
 		w:=new WinRect(gCtId.id)
 		if (!isPointInRect(pt, w.rect )) {
 			gCtId:=""
@@ -933,7 +933,7 @@ storectidloc(id:=""){
 	clearGCtidIfOutdated()	
 	global sender
 	global gCtId
-	gCtIdLoc:=getSinglectwinFromPoint(point.fromMouse(),id)
+	gCtIdLoc:=getSinglectwinFromPoint(getPointFromMouse(),id)
 	
 	if(isObject(gCtIdLoc) && isObject(gCtId)) {
 		if(gCtIdLoc.id == gCtId.id){
@@ -1476,7 +1476,7 @@ rotateDegrees(angleStart,angleOffset){
 	return normalized
 }
 
-class Point{
+class ClassPoint{
 	__New(x:="",y:="",id:=""){
 		if (x==""||y=="") {
 			MouseGetPos,x,y
@@ -1492,27 +1492,27 @@ class Point{
 	
 	fromMouse(){
 		mouseGetPos,x,y,id
-		return new Point(x,y,id)
+		return new ClassPoint(x,y,id)
 		
 	}
 	
 	fromNull(){
-		return new Point(0,0)
+		return new ClassPoint(0,0)
 	}
 	
 	subst(o){
-		return new Point(this.x-o.x,this.y-o.y)
+		return new ClassPoint(this.x-o.x,this.y-o.y)
 	}
 
 	add(o){
-		return new Point(this.x+o.x,this.y+o.y)
+		return new ClassPoint(this.x+o.x,this.y+o.y)
 	}
 mul(f){
-		return new Point(this.x*f,this.y*f)
+		return new ClassPoint(this.x*f,this.y*f)
 	}
 	
 	round(){
-		return new Point(round(this.x),Round(this.y))
+		return new ClassPoint(round(this.x),Round(this.y))
 	}
 	equal(o){
 		return (this.x==o.x &&		this.y==o.y)
@@ -1530,7 +1530,7 @@ mul(f){
 
 	dist(o:="") {
 		if(!o){
-			o:=point.fromnull()
+			o:=ClassPoint.fromnull()
 		}
 		diff:=o.subst(this)
 		
@@ -1544,7 +1544,7 @@ mul(f){
 	
 	getClockwiseDegrees(centerP:="") {  ;from 0 to 1
 		if(!centerP){
-			centerP:=point.fromNull()
+			centerP:=ClassPoint.fromNull()
 		}
 		cycler:=this.subst(centerP)
 		
@@ -1557,6 +1557,9 @@ mul(f){
 	}
 }
 
+getPointFromMouse() {
+	return ClassPoint.fromMouse()
+}
 	
 isPointInRect(p,r){
 	if(p.x>=r.x&&p.x<=r.x+r.w && p.y>=r.y&&p.y<=r.y+r.h)
@@ -1752,7 +1755,7 @@ class rect{
 		return this.y+this.h
 	}
 	pointFromRel(rx,ry){
-		return new point(this.x+this.w*rx,this.y+this.h*ry)
+		return new ClassPoint(this.x+this.w*rx,this.y+this.h*ry)
 	}
 	round(){
 		c:=this.clone()

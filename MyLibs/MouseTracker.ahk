@@ -52,7 +52,7 @@ class StartInfo {
 		return this
 	}
 	init(){
-		this.mstartpos:= Point.frommouse()
+		this.mstartpos:= ClassPoint.frommouse()
 		this.wstartpos:=new WinRect(this.mstartpos.id)
 		tick:=A_TickCount
 	}
@@ -132,7 +132,7 @@ class MouseTracker{
 		
 	}
 	calcPos(ByRef nowMPos, ByRef dx, ByRef dy){
-		nowMPos:=Point.frommouse()
+		nowMPos:=ClassPoint.frommouse()
 		dx:=nowMPos.x - this.trackData.startinfo.mstartpos.x
 		dy:=nowMPos.y - this.trackData.startinfo.mstartpos.y
 	}
