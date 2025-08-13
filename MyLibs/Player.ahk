@@ -36,7 +36,7 @@ mouseOnCtrlBoarder(){
 isMpcWinWithCtrlCheck(id:="") {
     setScalingAware()
     if(id==""){
-        id:=getWindowFromPoint(point.frommouse())
+        id:=getWindowFromPoint(ClassPoint.frommouse())
     }
     ret := ismpcwin(getctid(true)) || ismpcwin(id) && (isMpcVideoCtrlOrSeekBar()||mouseOnCtrlBoarder())
         ;      tt(ret)
