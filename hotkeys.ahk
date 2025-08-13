@@ -67,9 +67,11 @@ Return
 		keys.push("LAlt")
 		cb:=new MouseTrackerCBLAlt()
 		MouseTracker.instance().track(cb, keys)
+activateOther()
 	}
-	activateOther()
+	
 return
+
 ~*LAlt up::
 	setScalingAware()
 	global gMyAlt:=false
