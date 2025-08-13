@@ -1654,8 +1654,8 @@ class v2Man
 	}
 
 	getv(id){
-		VA_ISimpleAudioVolume_GetMasterVolume(this.getHandle(id), ret)
-		return ret
+		; VA_ISimpleAudioVolume_GetMasterVolume(this.getHandle(id), ret)
+		return 200
 	}
 
 	limit(level){
@@ -1729,7 +1729,7 @@ class v2Man
 		;ttos(id,level)
 		h:=this.getHandle(id)
 		if(h){
-			VA_ISimpleAudioVolume_SetMasterVolume(h, this.limit(level), 0)
+			; VA_ISimpleAudioVolume_SetMasterVolume(h, this.limit(level), 0)
 		}
 	}
 	
