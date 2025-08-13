@@ -18,36 +18,39 @@ googlesearch(){
         {
             send, {LCtrl Down}{LShift Down}f{LShift Up}{LCtrl Up} ;, ahk_id %id%
 
-        }else if isIdFromExe(getActiveWin(),"notepad++.exe")
-        {
-            send, {LCtrl Down}{LShift Down}f{LShift Up}{LCtrl Up} ;, ahk_id %id%
-            lastChar:=substr(searchQuery,StrLen(searchQuery))
-            ;if(lastChar=="("||lastChar==")") {
-            funcMode:=lastsearchQuery==searchQuery||lastChar=="("
-            if(funcMode){
-                searchQuery:=RegExReplace(searchQuery,"\s*\(\)?$","")
-                ;ttos("sameSearch")
-                searchQuery.="\s*\(.*\{" ;�
-            }
+        }
+        ; else if isIdFromExe(getActiveWin(),"notepad++.exe")
+        ; {
+        ;     send, {LCtrl Down}{LShift Down}f{LShift Up}{LCtrl Up} ;, ahk_id %id%
+        ;     lastChar:=substr(searchQuery,StrLen(searchQuery))
+        ;     ;if(lastChar=="("||lastChar==")") {
+        ;     funcMode:=lastsearchQuery==searchQuery||lastChar=="("
+        ;     if(funcMode){
+        ;         searchQuery:=RegExReplace(searchQuery,"\s*\(\)?$","")
+        ;         ;ttos("sameSearch")
+        ;         searchQuery.="\s*\(.*\{" ;�
+        ;     }
 
-            SendRaw , %searchQuery%
+        ;     SendRaw , %searchQuery%
 
-            loop,3
-                tabs.="{Tab}"
-            send, %tabs%
-            sendRaw,C:\ProgrammeUser\AHK
-            loop,6
-                tabs.="{Tab}"
-            send, %tabs%
-            send, i
+        ;     loop,3
+        ;         tabs.="{Tab}"
+        ;     send, %tabs%
+        ;     sendRaw,C:\ProgrammeUser\AHK
+        ;     loop,6
+        ;         tabs.="{Tab}"
+        ;     send, %tabs%
+        ;     send, i
 
-            if(funcMode){
-                send, {Down}
-            }else{
-                send, {Up}
-            }
-            send, {Enter}
-        }else IfInString, searchQuery, :\
+        ;     if(funcMode){
+        ;         send, {Down}
+        ;     }else{
+        ;         send, {Up}
+        ;     }
+        ;     send, {Enter}
+        ; }
+        
+        else IfInString, searchQuery, :\
         {
             explorerpath:= "explorer /root," searchQuery
             Run, %explorerpath%
